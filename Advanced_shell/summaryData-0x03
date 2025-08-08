@@ -1,0 +1,30 @@
+#!/bin/bash
+
+INPUT_DIR="pokemon_data"
+OUTPUT_FILE="pokemon_report.csv"
+
+# Print CSV header
+echo "Name,Height (m),Weight (kg)" > "$OUTPUT_FILE"
+
+# Loop through all JSON files in the input directory
+for file in "$INPUT_DIR"/*.json; do
+    # Extract name, height (decimeters), and weight (hectograms)
+    name=$(jq -r '.name' "$file" | sed 's/^\(.\)/\u\1/')
+    height_dm=$(jq -r '.height' "$file")
+    weight_hecto=$(jq -r '.weight' "$file")
+
+    # Convert height to meters with 1 decimal place and weight to kg with 1 decimal place
+    height_m=$(echo "$height_dm" | awk '{printf "%.1f", $1 / 10}')
+    weight_kg=$(echo "$weight_hecto" | awk '{printf "%.1f", $1 / 10}')
+
+    # Append to CSV
+    echo "$name,$height_m,$weight_kg" >> "$OUTPUT_FILE"
+done
+
+echo "CSV Report generated at: $OUTPUT_FILE"
+echo
+
+# Calculate average height and weight using awk
+avg_values=$(awk -F, 'NR>1 {sumH+=$2; sumW+=$3; count++} END {printf "Average Height: %.2f m\nAverage Weight: %.2f kg\n", sumH/count, sumW/count}' "$OUTPUT_FILE")
+
+echo "$avg_values"
