@@ -1,23 +1,35 @@
 #!/bin/bash
 
 OUTPUT_DIR="pokemon_data"
-
 mkdir -p "$OUTPUT_DIR"
 
-pokemon_list=('bulbasaur' 'ivysaur' 'venusaur' 'charmander' 'charmeleon')
+pokemon_list=("bulbasaur" "ivysaur" "venusaur" "charmander" "charmeleon")
 
-batchProcessing-0x02 doesn't contain: ["bulbasaur", "ivysaur", "venusaur", "charmander", "charmeleon"]
+# Function to fetch data with retries
+fetch_pokemon_data() {
+    local pokemon=$1
+    local max_retries=3
+    local attempt=1
+
+    while [ $attempt -le $max_retries ]; do
+        echo "Fetching data for $pokemon (Attempt $attempt)..."
+        curl -s -f "https://pokeapi.co/api/v2/pokemon/$pokemon" -o "$OUTPUT_DIR/$pokemon.json"
+        if [ $? -eq 0 ]; then
+            echo "Saved data to $OUTPUT_DIR/$pokemon.json ✅"
+            return 0
+        else
+            echo "Failed to fetch data for $pokemon."
+            ((attempt++))
+            sleep 1
+        fi
+    done
+
+    echo "Error: Could not fetch data for $pokemon after $max_retries attempts." >&2
+    return 1
+}
+
 for pokemon in "${pokemon_list[@]}"; do
-    name_lower=$(echo "$pokemon" | tr '[:upper:]' '[:lower:]')
-
-    echo "Fetching data for $name_lower..."
-
-    curl -s "https://pokeapi.co/api/v2/pokemon/$name_lower" -o "$OUTPUT_DIR/$name_lower.json"
-
-    if [ $? -eq 0 ]; then
-        echo "Saved data to $OUTPUT_DIR/$name_lower.json."
-    else
-        echo "Failed to fetch data for $name_lower."
-    fi
-    sleep 1  # To avoid hitting the API too quickly
+    fetch_pokemon_data "$pokemon"
+    # Delay to avoid rate limiting
+    sleep 1
 done
