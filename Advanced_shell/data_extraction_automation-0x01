@@ -2,14 +2,21 @@
 
 JSON_FILE="data.json"
 
-name=$(jq -r '.types[0].type.name' "$JSON_FILE" | sed 's/.*/\u&/')
+# Extract Pokémon name and capitalize first letter
+name=$(jq -r '.name' "$JSON_FILE" | sed 's/^\(.\)/\u\1/')
 
-type=$(jq -r '.types[0].type.name' "$JSON_FILE" | sed 's/.*/\u&/')
+# Extract first type and capitalize first letter
+type=$(jq -r '.types[0].type.name' "$JSON_FILE" | sed 's/^\(.\)/\u\1/')
 
 weight_hecto=$(jq -r '.weight' "$JSON_FILE")
-weight_kg=$(echo "scale=1; $weight_hecto / 10" | bc)
+
+# Use awk to convert hectograms to kg (integer)
+weight_kg=$(echo "$weight_hecto" | awk '{printf "%d", $1 / 10}')
 
 height_dm=$(jq -r '.height' "$JSON_FILE")
-height_m=$(echo "scale=1; $height_dm / 10" | bc)
 
-echo "$name is of type $type, weighs ${weight_kg} kg, and is ${height_m} m tall."
+# Use awk to convert decimeters to meters with one decimal place
+height_m=$(echo "$height_dm" | awk '{printf "%.1f", $1 / 10}')
+
+# Print with no extra spaces, matching the example exactly
+echo "$name is of type $type, weighs ${weight_kg}kg, and is ${height_m}m tall."
