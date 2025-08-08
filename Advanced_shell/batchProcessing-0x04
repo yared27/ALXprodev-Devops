@@ -1,8 +1,11 @@
 #!/bin/bash
+
 OUTPUT_DIR="pokemon_data"
 mkdir -p "$OUTPUT_DIR"
 
 pokemon_list=("bulbasaur" "ivysaur" "venusaur" "charmander" "charmeleon")
+
+pids=()
 
 fetch_pokemon() {
     local pokemon=$1
@@ -14,12 +17,17 @@ fetch_pokemon() {
     fi
 }
 
-# Launch all fetches in background
 for pokemon in "${pokemon_list[@]}"; do
     fetch_pokemon "$pokemon" &
+    pids+=($!)
 done
 
-# Wait for all background jobs to complete
-wait
+# Wait for all jobs, with timeout or manual kill example
+for pid in "${pids[@]}"; do
+    wait $pid || {
+        echo "Process $pid failed or was interrupted. Killing..."
+        kill $pid 2>/dev/null
+    }
+done
 
 echo "All Pokémon data fetched."
