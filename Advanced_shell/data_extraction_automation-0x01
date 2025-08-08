@@ -11,12 +11,12 @@ type=$(jq -r '.types[0].type.name' "$JSON_FILE" | sed 's/^\(.\)/\u\1/')
 weight_hecto=$(jq -r '.weight' "$JSON_FILE")
 
 # Use awk to convert hectograms to kg (integer)
-weight_kg=$(echo "$weight_hecto" | awk '{printf "%d", $1 / 10}')
+formatted_weight=$(echo "$weight_hecto" | awk '{printf "%d", $1 / 10}')
 
 height_dm=$(jq -r '.height' "$JSON_FILE")
 
 # Use awk to convert decimeters to meters with one decimal place
-height_m=$(echo "$height_dm" | awk '{printf "%.1f", $1 / 10}')
+formatted_height=$(echo "$height_dm" | awk '{printf "%.1f", $1 / 10}')
 
 # Print with no extra spaces, matching the example exactly
-echo "$name is of type $type, weighs ${weight_kg}kg, and is ${height_m}m tall."
+echo "$name is of type $type, weighs ${formatted_weight}kg, and is ${formatted_height}m tall."
