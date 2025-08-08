@@ -1,0 +1,15 @@
+#!/bin/bash
+
+JSON_FILE="data.json"
+
+name=$(jq -r '.types[0].type.name' "$JSON_FILE" | sed 's/.*/\u&/')
+
+type=$(jq -r '.types[0].type.name' "$JSON_FILE" | sed 's/.*/\u&/')
+
+weight_hecto=$(jq -r '.weight' "$JSON_FILE")
+weight_kg=$(echo "scale=1; $weight_hecto / 10" | bc)
+
+height_dm=$(jq -r '.height' "$JSON_FILE")
+height_m=$(echo "scale=1; $height_dm / 10" | bc)
+
+echo "$name is of type $type, weighs ${weight_kg} kg, and is ${height_m} m tall."
