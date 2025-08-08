@@ -1,0 +1,22 @@
+#!/bin/bash
+
+OUTPUT_DIR="pokemon_data"
+
+mkdir -p "$OUTPUT_DIR"
+
+pokemon_list=('Bulbasaur' 'Ivysaur' 'Venusaur' 'Charmander' 'Charmeleon')
+
+for pokemon in "${pokemon_list[@]}"; do
+    name_lower=$(echo "$pokemon" | tr '[:upper:]' '[:lower:]')
+
+    echo "Fetching data for $name_lower..."
+
+    curl -s "https://pokeapi.co/api/v2/pokemon/$name_lower" -o "$OUTPUT_DIR/$name_lower.json"
+
+    if [ $? -eq 0 ]; then
+        echo "Saved data to $OUTPUT_DIR/$name_lower.json."
+    else
+        echo "Failed to fetch data for $name_lower."
+    fi
+    sleep 1  # To avoid hitting the API too quickly
+done
